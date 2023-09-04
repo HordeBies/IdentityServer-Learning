@@ -1,4 +1,4 @@
-﻿namespace Movies.API.Model
+﻿namespace Movies.Client.Models
 {
     public class Movie
     {
