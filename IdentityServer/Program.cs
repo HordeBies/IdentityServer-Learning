@@ -2,23 +2,14 @@ using IdentityServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllersWithViews();
 builder.Services.AddIdentityServer()
     .AddInMemoryClients(Config.Clients)
-    //.AddInMemoryIdentityResources(Config.IdentityResources)
+    .AddInMemoryIdentityResources(Config.IdentityResources)
     //.AddInMemoryApiResources(Config.ApiResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
-    //.AddTestUsers(Config.TestUsers)
+    .AddTestUsers(Config.TestUsers)
     .AddDeveloperSigningCredential();
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("default", policy =>
-//    {
-//        policy.WithOrigins("http://localhost:5001", "https://jwt.io")
-//            .AllowAnyHeader()
-//            .AllowAnyMethod();
-//    });
-//});
 
 var app = builder.Build();
 
@@ -27,10 +18,11 @@ if(app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+app.UseStaticFiles();
 app.UseRouting();
-//app.UseCors("default");
 app.UseIdentityServer();
+app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World!");
+app.MapDefaultControllerRoute();
 
 app.Run();
