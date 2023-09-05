@@ -7,7 +7,7 @@ namespace Movies.Client.Services
         Task<IEnumerable<Movie>> GetMovies();
         Task<Movie> GetMovie(int id);
         Task<Movie> CreateMovie(Movie movie);
-        Task<Movie> UpdateMovie(Movie movie);
+        Task UpdateMovie(Movie movie);
         Task DeleteMovie(int id);
     }
 }

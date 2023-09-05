@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
+using Movies.Client.HttpHandlers;
 using Movies.Client.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,8 +33,31 @@ builder.Services
     options.GetClaimsFromUserInfoEndpoint = true;
 });
 
-
 builder.Services.AddScoped<IMovieApiService, MovieApiService>();
+builder.Services.AddTransient<AuthenticationDelegatingHandler>();
+builder.Services.AddHttpClient("MovieAPIClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("MoviesApi") ?? throw new Exception("MoviesApi connection string is missing"));
+    client.DefaultRequestHeaders.Clear();
+    //client.DefaultRequestHeaders.Accept.Add(new("application/json"));
+    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+})
+    .AddHttpMessageHandler<AuthenticationDelegatingHandler>();
+
+builder.Services.AddHttpClient("IDPClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("IdentityServer") ?? throw new Exception("IdentityServer connection string is missing"));
+    client.DefaultRequestHeaders.Clear();
+    //client.DefaultRequestHeaders.Accept.Add(new("application/json"));
+    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+});
+builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+{
+    Address = builder.Configuration.GetConnectionString("IdentityServer") + "/connect/token" ?? throw new Exception("IdentityServer connection string is missing"),
+    ClientId = "MovieClient",
+    ClientSecret = "secret",
+    Scope = "MovieAPI"
+});
 
 var app = builder.Build();
 
