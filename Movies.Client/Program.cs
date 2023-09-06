@@ -1,4 +1,6 @@
-﻿using IdentityModel.Client;
+﻿using IdentityModel;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Net.Http.Headers;
@@ -23,16 +25,33 @@ builder.Services
     options.Authority = builder.Configuration.GetConnectionString("IdentityServer") ?? throw new Exception("IdentityServer connection string is missing");
     options.ClientId = "movies_mvc_client";
     options.ClientSecret = "secret";
-    options.ResponseType = "code";
+    options.ResponseType = "code id_token";
 
     options.Scope.Add("openid");
     options.Scope.Add("profile");
+    options.Scope.Add("address");
+    options.Scope.Add("email");
+    options.Scope.Add("roles");
+    options.Scope.Add("MovieAPI");
+
+    //options.ClaimActions.MapJsonKey("role", "role"); // If below doesnt work, try this
+    options.ClaimActions.MapUniqueJsonKey("role", "role");
+
 
     options.SaveTokens = true;
 
     options.GetClaimsFromUserInfoEndpoint = true;
+
+    options.TokenValidationParameters = new()
+    {
+        NameClaimType = JwtClaimTypes.GivenName,
+        RoleClaimType = JwtClaimTypes.Role
+    };
 });
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMovieApiService, MovieApiService>();
 builder.Services.AddTransient<AuthenticationDelegatingHandler>();
 builder.Services.AddHttpClient("MovieAPIClient", client =>
@@ -51,14 +70,17 @@ builder.Services.AddHttpClient("IDPClient", client =>
     //client.DefaultRequestHeaders.Accept.Add(new("application/json"));
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
 });
-builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+//builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+//{
+//    Address = builder.Configuration.GetConnectionString("IdentityServer") + "/connect/token" ?? throw new Exception("IdentityServer connection string is missing"),
+//    ClientId = "MovieClient",
+//    ClientSecret = "secret",
+//    Scope = "MovieAPI"
+//});
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    Address = builder.Configuration.GetConnectionString("IdentityServer") + "/connect/token" ?? throw new Exception("IdentityServer connection string is missing"),
-    ClientId = "MovieClient",
-    ClientSecret = "secret",
-    Scope = "MovieAPI"
+    options.AccessDeniedPath = $"/Account/AccessDenied";
 });
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

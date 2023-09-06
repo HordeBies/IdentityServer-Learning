@@ -11,18 +11,19 @@ namespace IdentityServer
         public static IEnumerable<Client> Clients =>
             new List<Client>
             {
-                new Client
-                {
-                    ClientId="MovieClient",
-                    AllowedGrantTypes=GrantTypes.ClientCredentials,
-                    ClientSecrets={new Secret("secret".Sha256())},
-                    AllowedScopes={"MovieAPI"}
-                },
+                //new Client
+                //{
+                //    ClientId="MovieClient",
+                //    AllowedGrantTypes=GrantTypes.ClientCredentials,
+                //    ClientSecrets={new Secret("secret".Sha256())},
+                //    AllowedScopes={"MovieAPI"}
+                //},
                 new Client
                 {
                     ClientId = "movies_mvc_client",
                     ClientName = "Movies MVC Web App",
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.Hybrid,
+                    RequirePkce = false,
                     AllowRememberConsent =false,
                     RedirectUris = new List<string>()
                     {
@@ -40,6 +41,10 @@ namespace IdentityServer
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "roles",
+                        "MovieAPI"
                     },
                 }
             };
@@ -59,7 +64,10 @@ namespace IdentityServer
             new List<IdentityResource>
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile()
+                new IdentityResources.Profile(),
+                new IdentityResources.Address(),
+                new IdentityResources.Email(),
+                new IdentityResource("roles","Your role(s)", new List<string>(){ "role" })
             };
 
         public static List<TestUser> TestUsers =>
