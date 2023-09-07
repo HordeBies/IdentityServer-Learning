@@ -27,8 +27,8 @@ builder.Services.AddScoped<DbInitializerService>();
 //builder.Services.AddIdentityServer()
 //    .AddInMemoryClients(Config.Clients)
 //    .AddInMemoryIdentityResources(Config.IdentityResources)
-//    //.AddInMemoryApiResources(Config.ApiResources)
 //    .AddInMemoryApiScopes(Config.ApiScopes)
+//    .AddInMemoryApiResources(Config.ApiResources)
 //    .AddTestUsers(TestUsers.Users)
 //    .AddDeveloperSigningCredential();
 

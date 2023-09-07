@@ -24,6 +24,12 @@ namespace Movies.Client.Controllers
             return SignOut(CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
         }
 
+        public async Task<IActionResult> Anyone()
+        {
+            var userInfo = await accountService.GetUserInfo();
+            return View("OnlyAdmin", userInfo);
+        }
+
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> OnlyAdmin()
         {

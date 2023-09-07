@@ -1,4 +1,5 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authorization;
 using Movies.Client.Models;
 using System.Text.Json;
 
@@ -16,7 +17,7 @@ namespace Movies.Client.Services
         public async Task<Movie> CreateMovie(Movie movie)
         {
             var client = httpClientFactory.CreateClient("MovieAPIClient");
-            var request = new HttpRequestMessage(HttpMethod.Post, "/api/movies")
+            var request = new HttpRequestMessage(HttpMethod.Post, "/movies")
             {
                 Content = JsonContent.Create(movie)
             };
@@ -32,7 +33,7 @@ namespace Movies.Client.Services
         public async Task DeleteMovie(int id)
         {
             var client = httpClientFactory.CreateClient("MovieAPIClient");
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/movies/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"/movies/{id}");
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
@@ -41,7 +42,7 @@ namespace Movies.Client.Services
         public async Task<Movie> GetMovie(int id)
         {
             var client = httpClientFactory.CreateClient("MovieAPIClient");
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/api/movies/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/movies/{id}");
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
@@ -54,7 +55,7 @@ namespace Movies.Client.Services
         public async Task<IEnumerable<Movie>> GetMovies()
         {
             var client = httpClientFactory.CreateClient("MovieAPIClient");
-            var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies");
+            var request = new HttpRequestMessage(HttpMethod.Get, "/movies");
 
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
@@ -92,7 +93,7 @@ namespace Movies.Client.Services
         public async Task UpdateMovie(Movie movie)
         {
             var client = httpClientFactory.CreateClient("MovieAPIClient");
-            var request = new HttpRequestMessage(HttpMethod.Put, $"/api/movies/{movie.Id}")
+            var request = new HttpRequestMessage(HttpMethod.Put, $"/movies/{movie.Id}")
             {
                 Content = JsonContent.Create(movie)
             };

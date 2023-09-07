@@ -46,19 +46,20 @@ namespace IdentityServer
                         IdentityServerConstants.StandardScopes.Email,
                         "roles",
                         "MovieAPI"
-                    },
+                    }
                 }
             };
 
         public static IEnumerable<ApiScope> ApiScopes =>
             new List<ApiScope>
             {
-                new ApiScope("MovieAPI", "Movie API")
+                new ApiScope("MovieAPI", "Movie API", new[] { "role" })
             };
 
         public static IEnumerable<ApiResource> ApiResources =>
             new List<ApiResource>
             {
+                //new ApiResource("roles", "Your role(s)", new[] { "role" })
             };
 
         public static IEnumerable<IdentityResource> IdentityResources =>

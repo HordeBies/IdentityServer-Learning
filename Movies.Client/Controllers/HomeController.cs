@@ -15,6 +15,7 @@ namespace Movies.Client.Controllers
 
         public IActionResult Index()
         {
+            var claims = User.Claims;
             return View();
         }
 

@@ -62,7 +62,7 @@ builder.Services.AddScoped<IMovieApiService, MovieApiService>();
 builder.Services.AddTransient<AuthenticationDelegatingHandler>();
 builder.Services.AddHttpClient("MovieAPIClient", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("MoviesApi") ?? throw new Exception("MoviesApi connection string is missing"));
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("MoviesApiGw") ?? throw new Exception("MoviesApi connection string is missing"));
     client.DefaultRequestHeaders.Clear();
     //client.DefaultRequestHeaders.Accept.Add(new("application/json"));
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
