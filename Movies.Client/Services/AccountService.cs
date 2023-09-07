@@ -26,7 +26,7 @@ namespace Movies.Client.Services
                 throw new HttpRequestException("Something went wrong while requesting the discovery document");
             }
 
-            var accessToken = await httpContextAccessor.HttpContext?.GetTokenAsync(OpenIdConnectParameterNames.AccessToken) ?? throw new Exception("Access token not found");
+            var accessToken = await httpContextAccessor.HttpContext?.GetUserAccessTokenAsync() ?? throw new Exception("Access token not found");
 
             var userInfoResponse = await idpClient.GetUserInfoAsync(new UserInfoRequest
             {
@@ -43,7 +43,11 @@ namespace Movies.Client.Services
             //{
             //    userInfoDictionary.Add(claim.Type, claim.Value);
             //}
-            return new(userInfoResponse.Claims.ToDictionary(claim => claim.Type, claim => claim.Value));
+            var dict = userInfoResponse.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
+            dict["accessToken"] = accessToken;
+            dict["refreshToken"] = await httpContextAccessor.HttpContext.GetTokenAsync(OpenIdConnectParameterNames.RefreshToken);
+            dict["id_token"] = await httpContextAccessor.HttpContext?.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+            return new(dict);
         }
     }
 }

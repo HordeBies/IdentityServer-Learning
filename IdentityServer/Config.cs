@@ -24,7 +24,7 @@ namespace IdentityServer
                     ClientName = "Movies MVC Web App",
                     AllowedGrantTypes = GrantTypes.Hybrid,
                     RequirePkce = false,
-                    AllowRememberConsent =false,
+                    AllowOfflineAccess=true, // refresh token
                     RedirectUris = new List<string>()
                     {
                         "https://localhost:7003/signin-oidc"
@@ -42,6 +42,7 @@ namespace IdentityServer
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         IdentityServerConstants.StandardScopes.Email,
                         "roles",
                         "MovieAPI"

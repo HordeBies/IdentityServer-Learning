@@ -18,7 +18,10 @@ builder.Services
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
 })
-    .AddCookie()
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.Events.OnSigningOut = async e => { await e.HttpContext.RevokeUserRefreshTokenAsync(); };
+    })
     .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
 {
     // Note: these settings must match the application details, and preferably stored as secrets/configuration
@@ -33,6 +36,7 @@ builder.Services
     options.Scope.Add("email");
     options.Scope.Add("roles");
     options.Scope.Add("MovieAPI");
+    options.Scope.Add("offline_access"); // refresh token
 
     //options.ClaimActions.MapJsonKey("role", "role"); // If below doesnt work, try this
     options.ClaimActions.MapUniqueJsonKey("role", "role");
@@ -45,10 +49,12 @@ builder.Services
     options.TokenValidationParameters = new()
     {
         NameClaimType = JwtClaimTypes.GivenName,
-        RoleClaimType = JwtClaimTypes.Role
+        RoleClaimType = JwtClaimTypes.Role,
+        ValidateLifetime = true,
+        RequireExpirationTime = true,
     };
 });
-
+builder.Services.AddAccessTokenManagement().ConfigureBackchannelHttpClient(); // TODO: add polly resilience policies for refresh token
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -61,7 +67,7 @@ builder.Services.AddHttpClient("MovieAPIClient", client =>
     //client.DefaultRequestHeaders.Accept.Add(new("application/json"));
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
 })
-    .AddHttpMessageHandler<AuthenticationDelegatingHandler>();
+    /*.AddHttpMessageHandler<AuthenticationDelegatingHandler>()*/.AddUserAccessTokenHandler();
 
 builder.Services.AddHttpClient("IDPClient", client =>
 {
