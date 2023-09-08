@@ -19,7 +19,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form asp-route="Login">
+                        <form class="mb-3" asp-route="Login">
                             <input type="hidden" asp-for="ReturnUrl" />
 
                             <div class="form-group">
@@ -41,9 +41,15 @@
                                     </div>
                                 </div>
                             }
+
+                            <div>
+                                <p>The default users are alice/bob, password: Pass123$</p>
+                            </div>
+
                             <button class="btn btn-primary" name="button" value="login">Login</button>
                             <button class="btn btn-secondary" name="button" value="cancel">Cancel</button>
                         </form>
+                        <span >Don't have an account? <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a></span>
                     </div>
                 </div>
             </div>

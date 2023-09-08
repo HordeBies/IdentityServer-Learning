@@ -1,24 +1,47 @@
-using IdentityServer;
+using IdentityServer.Data;
 using IdentityServer.Data.Services;
-using IdentityServerHost.Quickstart.UI;
+using IdentityServer.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var migrationsAssembly = typeof(Program).GetTypeInfo().Assembly.GetName().Name;
-var connString = builder.Configuration.GetConnectionString("IS4-MySql") ?? throw new Exception("IS4-MySql connection string is missing");
+var is4Conn = builder.Configuration.GetConnectionString("IS4-MySql") ?? throw new Exception("IS4-MySql connection string is missing");
+
+var idConn = builder.Configuration.GetConnectionString("Identity-MySql") ?? throw new Exception("Identity-MySql connection string is missing");
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddIdentityServer()
-    .AddTestUsers(TestUsers.Users)
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySQL(idConn));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityServer(options =>
+{
+    options.Events.RaiseErrorEvents = true;
+    options.Events.RaiseInformationEvents = true;
+    options.Events.RaiseFailureEvents = true;
+    options.Events.RaiseSuccessEvents = true;
+
+    // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
+    options.EmitStaticAudienceClaim = true;
+})
+    .AddAspNetIdentity<ApplicationUser>()
     .AddConfigurationStore(options =>
     {
-        options.ConfigureDbContext = b => b.UseMySQL(connString, sql => sql.MigrationsAssembly(migrationsAssembly));
+        options.ConfigureDbContext = b => b.UseMySQL(is4Conn, sql => sql.MigrationsAssembly(migrationsAssembly));
     })
     .AddOperationalStore(options =>
     {
-        options.ConfigureDbContext = b => b.UseMySQL(connString, sql => sql.MigrationsAssembly(migrationsAssembly));
+        options.ConfigureDbContext = b => b.UseMySQL(is4Conn, sql => sql.MigrationsAssembly(migrationsAssembly));
     })
     .AddDeveloperSigningCredential();
 
@@ -43,16 +66,19 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
-app.MapDefaultControllerRoute();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapDefaultControllerRoute();
+});
 
-InitializeDatabase();
+await InitializeDatabase();
 app.Run();
 
-void InitializeDatabase()
+async Task InitializeDatabase()
 {
     using (var scope = app.Services.CreateScope())
     {
         var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializerService>();
-        dbInitializer.Initialize();
+        await dbInitializer.Initialize();
     }
 }

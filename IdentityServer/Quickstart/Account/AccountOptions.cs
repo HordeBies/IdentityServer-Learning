@@ -12,10 +12,12 @@ namespace IdentityServerHost.Quickstart.UI
         public static bool AllowRememberLogin = true;
         public static TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
 
-        // TODO: This part handles automatic logout redirect
+        public static string[] AllowedRoles = new string[] { "admin", "user" };
+
         public static bool ShowLogoutPrompt = false;
         public static bool AutomaticRedirectAfterSignOut = true;
 
         public static string InvalidCredentialsErrorMessage = "Invalid username or password";
+
     }
 }
